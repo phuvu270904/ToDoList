@@ -16,6 +16,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     public static ArrayList<Task> taskList = new ArrayList<Task>();
+    private DatabaseHelper databaseHelper;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,10 +28,16 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        
+        // Initialize database helper
+        databaseHelper = new DatabaseHelper(this);
     }
 
     protected void onStart() {
         super.onStart();
+        // Load tasks from database
+        taskList = databaseHelper.getAllTasks();
+        
         ListView lv = findViewById(R.id.listViewTask);
         TaskAdapter adapter = new TaskAdapter(this, taskList);
         lv.setAdapter(adapter);
@@ -38,5 +46,13 @@ public class MainActivity extends AppCompatActivity {
     public void onClickAdd(View v) {
         Intent i = new Intent(getApplicationContext(), AddTaskActivity.class);
         startActivity(i);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
     }
 }

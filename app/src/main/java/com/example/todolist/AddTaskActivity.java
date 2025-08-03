@@ -19,6 +19,8 @@ import java.util.Date;
 
 public class AddTaskActivity extends AppCompatActivity {
 
+    private DatabaseHelper databaseHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,6 +31,9 @@ public class AddTaskActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        
+        // Initialize database helper
+        databaseHelper = new DatabaseHelper(this);
     }
 
     public void onClickAddTask(View v) throws ParseException {
@@ -42,12 +47,28 @@ public class AddTaskActivity extends AppCompatActivity {
         String dateText = String.valueOf(dp.getDayOfMonth()) + "/" +
                             String.valueOf(dp.getMonth() + 1) + "/" +
                             String.valueOf(dp.getYear());
+        
         com.example.todolist.Task t = new Task(n, new SimpleDateFormat("dd/MM/yyyy").parse(dateText), d, des);
         System.out.println("Task new");
         System.out.println(t);
-        MainActivity.taskList.add(t);
-        Toast.makeText(getApplicationContext(), "A task is just created", Toast.LENGTH_LONG).show();
+        
+        // Save task to database instead of static list
+        long taskId = databaseHelper.insertTask(t);
+        if (taskId != -1) {
+            Toast.makeText(getApplicationContext(), "Task saved successfully!", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Error saving task", Toast.LENGTH_LONG).show();
+        }
+        
         Intent i = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(i);
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (databaseHelper != null) {
+            databaseHelper.close();
+        }
     }
 }

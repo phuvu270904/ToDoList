@@ -7,11 +7,11 @@ public class Task {
     public Date deadline;
     public int duration;
     public String description;
+    
     public Task(String n, Date dl, int d, String des) {
         name = n;
         deadline = dl;
         duration = d;
         description = des;
     }
-
 }
