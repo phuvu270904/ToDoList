@@ -53,7 +53,7 @@ public class AddTaskActivity extends AppCompatActivity {
         System.out.println(newTaskItem);
         
         // Save task to database instead of static list
-        long insertedTaskId = dbManager.insertTask(newTaskItem);
+        long insertedTaskId = dbManager.addTaskToDatabase(newTaskItem);
         if (insertedTaskId != -1) {
             Toast.makeText(getApplicationContext(), "Task saved successfully!", Toast.LENGTH_LONG).show();
         } else {

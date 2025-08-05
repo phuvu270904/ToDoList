@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Load tasks from database
-        todoItemsCollection = dbManager.getAllTasks();
+        todoItemsCollection = dbManager.retrieveAllTasks();
         
         ListView taskListView = findViewById(R.id.listViewTask);
         TaskAdapter listAdapter = new TaskAdapter(this, todoItemsCollection);

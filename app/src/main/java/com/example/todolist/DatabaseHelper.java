@@ -13,87 +13,87 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "todo_database";
-    private static final String TABLE_NAME = "tasks";
-    private static final String ID_COLUMN_NAME = "task_id";
-    private static final String NAME_COLUMN_NAME = "name";
-    private static final String DEADLINE_COLUMN_NAME = "deadline";
-    private static final String DURATION_COLUMN_NAME = "duration";
-    private static final String DESCRIPTION_COLUMN_NAME = "description";
-    private SQLiteDatabase database;
-    private static final String DATABASE_CREATE_QUERY = String.format(
+    private static final String DB_NAME = "task_management_db";
+    private static final String TASK_TABLE = "todo_items";
+    private static final String COLUMN_ID = "item_id";
+    private static final String COLUMN_TITLE = "task_title";
+    private static final String COLUMN_DUE_DATE = "due_date";
+    private static final String COLUMN_HOURS = "estimated_hours";
+    private static final String COLUMN_DETAILS = "task_details";
+    private SQLiteDatabase dbInstance;
+    private static final String CREATE_TABLE_QUERY = String.format(
             "CREATE TABLE %s (" +
             "%s INTEGER PRIMARY KEY AUTOINCREMENT, " +
             "%s TEXT, " +
             "%s TEXT, " +
             "%s INTEGER, " +
             "%s TEXT)",
-            TABLE_NAME, ID_COLUMN_NAME, NAME_COLUMN_NAME, DEADLINE_COLUMN_NAME, DURATION_COLUMN_NAME, DESCRIPTION_COLUMN_NAME);
+            TASK_TABLE, COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_HOURS, COLUMN_DETAILS);
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
 
-    public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 1);
-        database = getWritableDatabase();
+    public DatabaseHelper(Context appContext) {
+        super(appContext, DB_NAME, null, 1);
+        dbInstance = getWritableDatabase();
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL(DATABASE_CREATE_QUERY);
+    public void onCreate(SQLiteDatabase dbConnection) {
+        dbConnection.execSQL(CREATE_TABLE_QUERY);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        Log.w(this.getClass().getName(), TABLE_NAME + " database upgrade to version "
-                + newVersion + " - old data lost");
-        onCreate(db);
+    public void onUpgrade(SQLiteDatabase dbConnection, int previousVersion, int currentVersion) {
+        dbConnection.execSQL("DROP TABLE IF EXISTS " + TASK_TABLE);
+        Log.w(this.getClass().getName(), TASK_TABLE + " database upgrade to version "
+                + currentVersion + " - old data lost");
+        onCreate(dbConnection);
     }
 
-    public long insertTask(String name, Date deadline, int duration, String description) {
-        ContentValues rowValues = new ContentValues();
-        rowValues.put(NAME_COLUMN_NAME, name);
-        rowValues.put(DEADLINE_COLUMN_NAME, dateFormat.format(deadline));
-        rowValues.put(DURATION_COLUMN_NAME, duration);
-        rowValues.put(DESCRIPTION_COLUMN_NAME, description);
-        return database.insertOrThrow(TABLE_NAME, null, rowValues);
+    public long addTaskToDatabase(String taskTitle, Date dueDate, int hours, String taskDetails) {
+        ContentValues dataValues = new ContentValues();
+        dataValues.put(COLUMN_TITLE, taskTitle);
+        dataValues.put(COLUMN_DUE_DATE, dateFormatter.format(dueDate));
+        dataValues.put(COLUMN_HOURS, hours);
+        dataValues.put(COLUMN_DETAILS, taskDetails);
+        return dbInstance.insertOrThrow(TASK_TABLE, null, dataValues);
     }
 
-    public long insertTask(Task task) {
-        return insertTask(task.title, task.dueDate, task.estimatedHours, task.details);
+    public long addTaskToDatabase(Task taskItem) {
+        return addTaskToDatabase(taskItem.title, taskItem.dueDate, taskItem.estimatedHours, taskItem.details);
     }
 
-    public ArrayList<Task> getAllTasks() {
-        ArrayList<Task> taskList = new ArrayList<>();
-        Cursor results = database.query(TABLE_NAME,
-                new String[] {ID_COLUMN_NAME, NAME_COLUMN_NAME, DEADLINE_COLUMN_NAME, DURATION_COLUMN_NAME, DESCRIPTION_COLUMN_NAME},
-                null, null, null, null, NAME_COLUMN_NAME);
+    public ArrayList<Task> retrieveAllTasks() {
+        ArrayList<Task> todoCollection = new ArrayList<>();
+        Cursor queryResults = dbInstance.query(TASK_TABLE,
+                new String[] {COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_HOURS, COLUMN_DETAILS},
+                null, null, null, null, COLUMN_TITLE);
 
-        if (results.moveToFirst()) {
+        if (queryResults.moveToFirst()) {
             do {
-                int id = results.getInt(0);
-                String name = results.getString(1);
-                String deadlineStr = results.getString(2);
-                int duration = results.getInt(3);
-                String description = results.getString(4);
+                int taskId = queryResults.getInt(0);
+                String taskTitle = queryResults.getString(1);
+                String dueDateString = queryResults.getString(2);
+                int estimatedHours = queryResults.getInt(3);
+                String taskDetails = queryResults.getString(4);
 
                 try {
-                    Date deadline = dateFormat.parse(deadlineStr);
-                    Task task = new Task(name, deadline, duration, description);
-                    taskList.add(task);
-                } catch (ParseException e) {
-                    Log.e("DatabaseHelper", "Error parsing date: " + deadlineStr, e);
+                    Date dueDate = dateFormatter.parse(dueDateString);
+                    Task taskItem = new Task(taskTitle, dueDate, estimatedHours, taskDetails);
+                    todoCollection.add(taskItem);
+                } catch (ParseException parseError) {
+                    Log.e("DatabaseHelper", "Error parsing date: " + dueDateString, parseError);
                 }
-            } while (results.moveToNext());
+            } while (queryResults.moveToNext());
         }
-        results.close();
-        return taskList;
+        queryResults.close();
+        return todoCollection;
     }
 
     @Override
     public void close() {
-        if (database != null) {
-            database.close();
+        if (dbInstance != null) {
+            dbInstance.close();
         }
         super.close();
     }
