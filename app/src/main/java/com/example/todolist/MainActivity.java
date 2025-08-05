@@ -15,8 +15,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static ArrayList<Task> taskList = new ArrayList<Task>();
-    private DatabaseHelper databaseHelper;
+    public static ArrayList<Task> todoItemsCollection = new ArrayList<Task>();
+    private DatabaseHelper dbManager;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,29 +30,29 @@ public class MainActivity extends AppCompatActivity {
         });
         
         // Initialize database helper
-        databaseHelper = new DatabaseHelper(this);
+        dbManager = new DatabaseHelper(this);
     }
 
     protected void onStart() {
         super.onStart();
         // Load tasks from database
-        taskList = databaseHelper.getAllTasks();
+        todoItemsCollection = dbManager.getAllTasks();
         
-        ListView lv = findViewById(R.id.listViewTask);
-        TaskAdapter adapter = new TaskAdapter(this, taskList);
-        lv.setAdapter(adapter);
+        ListView taskListView = findViewById(R.id.listViewTask);
+        TaskAdapter listAdapter = new TaskAdapter(this, todoItemsCollection);
+        taskListView.setAdapter(listAdapter);
     }
 
-    public void onClickAdd(View v) {
-        Intent i = new Intent(getApplicationContext(), AddTaskActivity.class);
-        startActivity(i);
+    public void handleAddButtonClick(View viewElement) {
+        Intent navigationIntent = new Intent(getApplicationContext(), AddTaskActivity.class);
+        startActivity(navigationIntent);
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
+        if (dbManager != null) {
+            dbManager.close();
         }
     }
 }

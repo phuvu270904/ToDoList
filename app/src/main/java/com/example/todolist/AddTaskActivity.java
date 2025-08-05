@@ -19,7 +19,7 @@ import java.util.Date;
 
 public class AddTaskActivity extends AppCompatActivity {
 
-    private DatabaseHelper databaseHelper;
+    private DatabaseHelper dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,42 +33,42 @@ public class AddTaskActivity extends AppCompatActivity {
         });
         
         // Initialize database helper
-        databaseHelper = new DatabaseHelper(this);
+        dbManager = new DatabaseHelper(this);
     }
 
-    public void onClickAddTask(View v) throws ParseException {
-        String n, des;
-        Date dl;
-        int d;
-        n = ((EditText)findViewById(R.id.etTaskName)).getText().toString();
-        des = ((EditText)findViewById(R.id.etmDescriptions)).getText().toString();
-        DatePicker dp = (DatePicker) findViewById(R.id.dpDeadline);
-        d = Integer.valueOf(((EditText)findViewById(R.id.etDuration)).getText().toString());
-        String dateText = String.valueOf(dp.getDayOfMonth()) + "/" +
-                            String.valueOf(dp.getMonth() + 1) + "/" +
-                            String.valueOf(dp.getYear());
+    public void handleTaskSubmission(View viewElement) throws ParseException {
+        String taskTitle, taskDescription;
+        Date dueDate;
+        int estimatedDuration;
+        taskTitle = ((EditText)findViewById(R.id.editTextTaskTitle)).getText().toString();
+        taskDescription = ((EditText)findViewById(R.id.editTextTaskDescription)).getText().toString();
+        DatePicker datePicker = (DatePicker) findViewById(R.id.datePickerDeadline);
+        estimatedDuration = Integer.valueOf(((EditText)findViewById(R.id.editTextTaskDuration)).getText().toString());
+        String formattedDate = String.valueOf(datePicker.getDayOfMonth()) + "/" +
+                            String.valueOf(datePicker.getMonth() + 1) + "/" +
+                            String.valueOf(datePicker.getYear());
         
-        com.example.todolist.Task t = new Task(n, new SimpleDateFormat("dd/MM/yyyy").parse(dateText), d, des);
+        com.example.todolist.Task newTaskItem = new Task(taskTitle, new SimpleDateFormat("dd/MM/yyyy").parse(formattedDate), estimatedDuration, taskDescription);
         System.out.println("Task new");
-        System.out.println(t);
+        System.out.println(newTaskItem);
         
         // Save task to database instead of static list
-        long taskId = databaseHelper.insertTask(t);
-        if (taskId != -1) {
+        long insertedTaskId = dbManager.insertTask(newTaskItem);
+        if (insertedTaskId != -1) {
             Toast.makeText(getApplicationContext(), "Task saved successfully!", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getApplicationContext(), "Error saving task", Toast.LENGTH_LONG).show();
         }
         
-        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(i);
+        Intent navigationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(navigationIntent);
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (databaseHelper != null) {
-            databaseHelper.close();
+        if (dbManager != null) {
+            dbManager.close();
         }
     }
 }
