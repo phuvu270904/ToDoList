@@ -24,7 +24,7 @@ public class TaskAdapter extends ArrayAdapter<Task> {
         TextView textViewDetails = (TextView) recycledView.findViewById(R.id.tvDescriptions);
         textViewTitle.setText(currentTask.title);
         textViewDueDate.setText(currentTask.dueDate.toString().substring(0,10));
-        textViewHours.setText(String.valueOf(currentTask.estimatedHours));
+        textViewHours.setText(String.valueOf(currentTask.estimatedDays));
         textViewDetails.setText(String.valueOf(currentTask.details));
         return recycledView;
     }

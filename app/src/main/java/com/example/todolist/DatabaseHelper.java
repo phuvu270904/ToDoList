@@ -18,7 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_ID = "item_id";
     private static final String COLUMN_TITLE = "task_title";
     private static final String COLUMN_DUE_DATE = "due_date";
-    private static final String COLUMN_HOURS = "estimated_hours";
+    private static final String COLUMN_DAYS = "estimated_days";
     private static final String COLUMN_DETAILS = "task_details";
     private SQLiteDatabase dbInstance;
     private static final String CREATE_TABLE_QUERY = String.format(
@@ -28,12 +28,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "%s TEXT, " +
             "%s INTEGER, " +
             "%s TEXT)",
-            TASK_TABLE, COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_HOURS, COLUMN_DETAILS);
+            TASK_TABLE, COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_DAYS, COLUMN_DETAILS);
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
 
     public DatabaseHelper(Context appContext) {
-        super(appContext, DB_NAME, null, 1);
+        super(appContext, DB_NAME, null, 2);
         dbInstance = getWritableDatabase();
     }
 
@@ -50,23 +50,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(dbConnection);
     }
 
-    public long addTaskToDatabase(String taskTitle, Date dueDate, int hours, String taskDetails) {
+    public long addTaskToDatabase(String taskTitle, Date dueDate, int days, String taskDetails) {
         ContentValues dataValues = new ContentValues();
         dataValues.put(COLUMN_TITLE, taskTitle);
         dataValues.put(COLUMN_DUE_DATE, dateFormatter.format(dueDate));
-        dataValues.put(COLUMN_HOURS, hours);
+        dataValues.put(COLUMN_DAYS, days);
         dataValues.put(COLUMN_DETAILS, taskDetails);
         return dbInstance.insertOrThrow(TASK_TABLE, null, dataValues);
     }
 
     public long addTaskToDatabase(Task taskItem) {
-        return addTaskToDatabase(taskItem.title, taskItem.dueDate, taskItem.estimatedHours, taskItem.details);
+        return addTaskToDatabase(taskItem.title, taskItem.dueDate, taskItem.estimatedDays, taskItem.details);
     }
 
     public ArrayList<Task> retrieveAllTasks() {
         ArrayList<Task> todoCollection = new ArrayList<>();
         Cursor queryResults = dbInstance.query(TASK_TABLE,
-                new String[] {COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_HOURS, COLUMN_DETAILS},
+                new String[] {COLUMN_ID, COLUMN_TITLE, COLUMN_DUE_DATE, COLUMN_DAYS, COLUMN_DETAILS},
                 null, null, null, null, COLUMN_TITLE);
 
         if (queryResults.moveToFirst()) {
@@ -74,12 +74,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int taskId = queryResults.getInt(0);
                 String taskTitle = queryResults.getString(1);
                 String dueDateString = queryResults.getString(2);
-                int estimatedHours = queryResults.getInt(3);
+                int estimatedDays = queryResults.getInt(3);
                 String taskDetails = queryResults.getString(4);
 
                 try {
                     Date dueDate = dateFormatter.parse(dueDateString);
-                    Task taskItem = new Task(taskTitle, dueDate, estimatedHours, taskDetails);
+                    Task taskItem = new Task(taskTitle, dueDate, estimatedDays, taskDetails);
                     todoCollection.add(taskItem);
                 } catch (ParseException parseError) {
                     Log.e("DatabaseHelper", "Error parsing date: " + dueDateString, parseError);
