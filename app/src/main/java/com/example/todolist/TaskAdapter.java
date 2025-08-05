@@ -10,19 +10,22 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class TaskAdapter extends ArrayAdapter<Task> {
-    public TaskAdapter(Context context, ArrayList<Task> tasks) { super(context, 0, tasks); }
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Task t = getItem(position);
-        if (convertView == null)
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.task_item, parent, false);
-        TextView tvTaskname = (TextView) convertView.findViewById(R.id.tvTaskName);
-        TextView tvDeadline = (TextView) convertView.findViewById(R.id.tvDeadline);
-        TextView tvDuration = (TextView) convertView.findViewById(R.id.tvDuration);
-        TextView tvDescriptions = (TextView) convertView.findViewById(R.id.tvDescriptions);
-        tvTaskname.setText(t.name);
-        tvDeadline.setText(t.deadline.toString().substring(0,10));
-        tvDuration.setText(String.valueOf(t.duration));
-        tvDescriptions.setText(String.valueOf(t.description));
-        return convertView;
+    public TaskAdapter(Context appContext, ArrayList<Task> todoItems) { 
+        super(appContext, 0, todoItems); 
+    }
+    
+    public View getView(int itemPosition, View recycledView, ViewGroup parentContainer) {
+        Task currentTask = getItem(itemPosition);
+        if (recycledView == null)
+            recycledView = LayoutInflater.from(getContext()).inflate(R.layout.task_item, parentContainer, false);
+        TextView textViewTitle = (TextView) recycledView.findViewById(R.id.tvTaskName);
+        TextView textViewDueDate = (TextView) recycledView.findViewById(R.id.tvDeadline);
+        TextView textViewHours = (TextView) recycledView.findViewById(R.id.tvDuration);
+        TextView textViewDetails = (TextView) recycledView.findViewById(R.id.tvDescriptions);
+        textViewTitle.setText(currentTask.title);
+        textViewDueDate.setText(currentTask.dueDate.toString().substring(0,10));
+        textViewHours.setText(String.valueOf(currentTask.estimatedHours));
+        textViewDetails.setText(String.valueOf(currentTask.details));
+        return recycledView;
     }
 }

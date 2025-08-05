@@ -60,7 +60,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public long insertTask(Task task) {
-        return insertTask(task.name, task.deadline, task.duration, task.description);
+        return insertTask(task.title, task.dueDate, task.estimatedHours, task.details);
     }
 
     public ArrayList<Task> getAllTasks() {
